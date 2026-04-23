@@ -1,0 +1,250 @@
+{
+  "info": {
+    "name": "MoveSmart API Testing",
+    "description": "Complete API test suite for MoveSmart logistics platform",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "1. Public Endpoints",
+      "item": [
+        {
+          "name": "Geocoding - Search Address",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/geocode?q=new%20york&page=1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "geocode"],
+              "query": [
+                { "key": "q", "value": "new york" },
+                { "key": "page", "value": "1" }
+              ]
+            },
+            "description": "Search for addresses (minimum 3 characters)"
+          },
+          "response": []
+        },
+        {
+          "name": "Geocoding - Invalid Query",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/geocode?q=ab",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "geocode"],
+              "query": [
+                { "key": "q", "value": "ab" }
+              ]
+            },
+            "description": "Test query validation (< 3 chars)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Authentication",
+      "item": [
+        {
+          "name": "Get Session (Unauthenticated)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/session",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "session"]
+            },
+            "description": "Check current session (no auth)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get CSRF Token",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/csrf",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "csrf"]
+            },
+            "description": "Get CSRF token for forms"
+          },
+          "response": []
+        },
+        {
+          "name": "List Auth Providers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/providers",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "providers"]
+            },
+            "description": "List available auth providers (credentials, google)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Protected Endpoints (Require Auth)",
+      "item": [
+        {
+          "name": "Upload File - Cloudinary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/uploads",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "uploads"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\",\n  \"folder\": \"movesmart/documents\"\n}"
+            },
+            "description": "Upload file to Cloudinary (requires authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Ably Auth Token",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/ably/auth",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "ably", "auth"]
+            },
+            "description": "Get token for Ably real-time messaging (requires authentication)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Webhooks",
+      "item": [
+        {
+          "name": "Stripe Webhook - Payment Intent Succeeded",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "stripe-signature",
+                "value": "t={{TIMESTAMP}},v1={{SIGNATURE}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/webhooks/stripe",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "webhooks", "stripe"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"evt_test\",\n  \"type\": \"payment_intent.succeeded\",\n  \"data\": {\n    \"object\": {\n      \"id\": \"pi_test123\",\n      \"amount\": 10000,\n      \"currency\": \"usd\",\n      \"status\": \"succeeded\",\n      \"metadata\": {\n        \"shipmentId\": \"ship_123\"\n      }\n    }\n  }\n}"
+            },
+            "description": "Stripe webhook for successful payment (requires valid signature)"
+          },
+          "response": []
+        },
+        {
+          "name": "Stripe Webhook - Payment Intent Failed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "stripe-signature",
+                "value": "t={{TIMESTAMP}},v1={{SIGNATURE}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/api/webhooks/stripe",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "webhooks", "stripe"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"evt_test\",\n  \"type\": \"payment_intent.payment_failed\",\n  \"data\": {\n    \"object\": {\n      \"id\": \"pi_test456\",\n      \"amount\": 5000,\n      \"currency\": \"usd\",\n      \"status\": \"requires_payment_method\",\n      \"metadata\": {\n        \"shipmentId\": \"ship_456\"\n      }\n    }\n  }\n}"
+            },
+            "description": "Stripe webhook for failed payment"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. OAuth Callbacks",
+      "item": [
+        {
+          "name": "Google OAuth Callback",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE_URL}}/api/auth/callback/google?code=4%2F0AY0e-g5test&state=state123",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["api", "auth", "callback", "google"],
+              "query": [
+                { "key": "code", "value": "4/0AY0e-g5test" },
+                { "key": "state", "value": "state123" }
+              ]
+            },
+            "description": "Google OAuth callback handler (called by Google during sign-in)"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "TIMESTAMP",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "SIGNATURE",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
