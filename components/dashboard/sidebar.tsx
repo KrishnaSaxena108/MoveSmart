@@ -42,6 +42,7 @@ import {
   FileText,
   HelpCircle,
   Bell,
+  Gavel,
 } from "lucide-react"
 import { logoutUser } from "@/lib/actions/auth"
 import type { UserRole, VerificationStatus } from "@/lib/db/models/user"
@@ -107,6 +108,11 @@ const carrierNavItems = [
     icon: Clock,
   },
   {
+    title: "Live Auctions",
+    href: "/dashboard/auctions",
+    icon: Gavel,
+  },
+  {
     title: "My Bids",
     href: "/dashboard/bids",
     icon: DollarSign,
@@ -153,6 +159,11 @@ const adminNavItems = [
     title: "Disputes",
     href: "/dashboard/admin/disputes",
     icon: FileText,
+  },
+  {
+    title: "Uploads",
+    href: "/dashboard/admin/uploads",
+    icon: Package,
   },
   {
     title: "Messages",

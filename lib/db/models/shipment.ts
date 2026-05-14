@@ -101,6 +101,18 @@ export interface IShipment extends Document {
     totalBids: number
   }
   
+  // Live auction specific
+  liveAuction?: {
+    desiredTime: Date // When the auction should end and winner auto-selected
+    startTime: Date // 5 minutes before desired time
+    endTime: Date // At desired time
+    cooldownEndTime: Date // 10 seconds after end time
+    winnerId?: mongoose.Types.ObjectId // Winning carrier
+    winningBidId?: mongoose.Types.ObjectId // Winning bid
+    winningAmount?: number
+    winnerSelectedAt?: Date
+  }
+  
   // Instant specific
   instant?: {
     expiresAt: Date
@@ -236,6 +248,23 @@ const ShipmentSchema = new Schema<IShipment>(
       totalBids: { type: Number, default: 0 },
     },
     
+    liveAuction: {
+      desiredTime: Date,
+      startTime: Date,
+      endTime: Date,
+      cooldownEndTime: Date,
+      winnerId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+      winningBidId: {
+        type: Schema.Types.ObjectId,
+        ref: "Bid",
+      },
+      winningAmount: Number,
+      winnerSelectedAt: Date,
+    },
+    
     instant: {
       expiresAt: Date,
       isUrgent: { type: Boolean, default: false },
@@ -290,5 +319,8 @@ ShipmentSchema.index({ totalWeight: 1 })
 ShipmentSchema.index({ "pricing.budget": 1 })
 ShipmentSchema.index({ "pickup.dateWindow.start": 1 })
 ShipmentSchema.index({ createdAt: -1 })
+ShipmentSchema.index({ "liveAuction.endTime": 1 })
+ShipmentSchema.index({ "liveAuction.cooldownEndTime": 1 })
+ShipmentSchema.index({ "liveAuction.winnerId": 1 })
 
 export const Shipment: Model<IShipment> = models.Shipment || mongoose.model<IShipment>("Shipment", ShipmentSchema)

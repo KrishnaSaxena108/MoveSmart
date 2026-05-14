@@ -32,6 +32,7 @@ import { format, formatDistanceToNow } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { BidForm } from '@/components/bids/bid-form'
 import { BidsList } from '@/components/bids/bids-list'
+import { LiveBidding } from '@/components/auctions/live-bidding'
 import { acceptInstantBooking } from '@/lib/actions/bids'
 import { toast } from 'sonner'
 
@@ -87,6 +88,14 @@ interface ShipmentDetailProps {
       minimumBid?: number
       instantPrice?: number
       budget?: { min: number; max: number }
+    }
+    liveAuction?: {
+      startTime: Date
+      endTime: Date
+      cooldownEndTime: Date
+      winnerId?: string
+      winningAmount?: number
+      winnerSelectedAt?: Date
     }
     distance?: number
     estimatedDuration?: string
@@ -404,12 +413,35 @@ export function ShipmentDetail({
             </TabsContent>
 
             <TabsContent value="bids" className="mt-4">
-              <BidsList
-                shipmentId={shipment._id}
-                bids={bids as Parameters<typeof BidsList>[0]['bids']}
-                isShipper={isShipper}
-                shipmentStatus={shipment.status}
-              />
+              {shipment.liveAuction ? (
+                <LiveBidding
+                  shipmentId={shipment._id}
+                  liveAuction={{
+                    startTime: new Date(shipment.liveAuction.startTime),
+                    endTime: new Date(shipment.liveAuction.endTime),
+                    cooldownEndTime: new Date(shipment.liveAuction.cooldownEndTime),
+                    winnerId: shipment.liveAuction.winnerId,
+                    winningAmount: shipment.liveAuction.winningAmount,
+                    winnerSelectedAt: shipment.liveAuction.winnerSelectedAt ? new Date(shipment.liveAuction.winnerSelectedAt) : undefined,
+                  }}
+                  bids={bids.map((bid: any) => ({
+                    _id: bid._id,
+                    amount: bid.amount,
+                    carrier: bid.carrier,
+                    isWinner: bid.isWinner,
+                    createdAt: new Date(bid.createdAt),
+                  })) as Parameters<typeof LiveBidding>[0]['bids']}
+                  isCarrier={isCarrier}
+                  currentUserId={currentUserId}
+                />
+              ) : (
+                <BidsList
+                  shipmentId={shipment._id}
+                  bids={bids as Parameters<typeof BidsList>[0]['bids']}
+                  isShipper={isShipper}
+                  shipmentStatus={shipment.status}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="shipper" className="mt-4">

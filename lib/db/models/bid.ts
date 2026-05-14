@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Model, models } from "mongoose"
 
-export type BidStatus = "pending" | "accepted" | "rejected" | "withdrawn" | "expired" | "countered"
+export type BidStatus = "pending" | "accepted" | "rejected" | "withdrawn" | "expired" | "countered" | "auction_winner" | "auction_lost"
 
 export interface IBid extends Document {
   _id: mongoose.Types.ObjectId
@@ -23,6 +23,14 @@ export interface IBid extends Document {
     fromRole: "shipper" | "carrier"
     createdAt: Date
   }>
+  
+  // Live auction fields
+  isLiveAuction?: boolean
+  auctionStartTime?: Date // 5 minutes before desired time
+  auctionEndTime?: Date // At desired time
+  cooldownEndTime?: Date // 10 seconds after auction end
+  isWinner?: boolean
+  winnerSelectedAt?: Date
   
   // Final
   acceptedAmount?: number
@@ -67,7 +75,7 @@ const BidSchema = new Schema<IBid>(
     
     status: {
       type: String,
-      enum: ["pending", "accepted", "rejected", "withdrawn", "expired", "countered"],
+      enum: ["pending", "accepted", "rejected", "withdrawn", "expired", "countered", "auction_winner", "auction_lost"],
       default: "pending",
     },
     
@@ -77,6 +85,14 @@ const BidSchema = new Schema<IBid>(
       fromRole: { type: String, enum: ["shipper", "carrier"], required: true },
       createdAt: { type: Date, default: Date.now },
     }],
+    
+    // Live auction fields
+    isLiveAuction: { type: Boolean, default: false },
+    auctionStartTime: Date,
+    auctionEndTime: Date,
+    cooldownEndTime: Date,
+    isWinner: { type: Boolean, default: false },
+    winnerSelectedAt: Date,
     
     acceptedAmount: Number,
     acceptedAt: Date,
@@ -100,6 +116,9 @@ BidSchema.index({ status: 1 })
 BidSchema.index({ amount: 1 })
 BidSchema.index({ createdAt: -1 })
 BidSchema.index({ expiresAt: 1 })
+BidSchema.index({ auctionEndTime: 1 })
+BidSchema.index({ cooldownEndTime: 1 })
+BidSchema.index({ isLiveAuction: 1, auctionEndTime: 1 })
 
 // Compound indexes
 BidSchema.index({ shipmentId: 1, carrierId: 1 }, { unique: true })

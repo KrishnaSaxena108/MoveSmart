@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Clock,
   DollarSign,
+  FileText,
   Package,
   Shield,
   Truck,
@@ -349,6 +350,15 @@ export async function AdminDashboard({ user }: AdminDashboardProps) {
                 <span className="flex items-center gap-2">
                   <Package className="h-4 w-4" />
                   Track shipments
+                </span>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" className="w-full justify-between">
+              <Link href="/dashboard/admin/uploads">
+                <span className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Manage uploads
                 </span>
                 <ArrowRight className="h-4 w-4" />
               </Link>

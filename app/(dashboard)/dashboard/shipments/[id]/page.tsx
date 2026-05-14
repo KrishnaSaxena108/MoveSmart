@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { getShipmentById } from '@/lib/actions/shipments'
 import { getBidsForShipment } from '@/lib/actions/bids'
+import { getLiveAuctionBids } from '@/lib/actions/live-auction'
 import { ShipmentDetail } from '@/components/shipments/shipment-detail'
 
 interface ShipmentPageProps {
@@ -28,11 +29,19 @@ export default async function ShipmentPage({ params }: ShipmentPageProps) {
     notFound()
   }
 
-  const bids = bidsResult.success
+  // If it's a live auction, fetch live auction bids instead
+  let bids = bidsResult.success
     ? ((bidsResult as { bids?: any[]; data?: any[] }).bids
       ?? (bidsResult as { data?: any[] }).data
       ?? [])
     : []
+
+  if (shipment.liveAuction) {
+    const liveAuctionResult = await getLiveAuctionBids(id)
+    if (liveAuctionResult.success) {
+      bids = liveAuctionResult.bids || []
+    }
+  }
 
   const shipmentData = JSON.parse(JSON.stringify(shipment)) as any
   const bidsData = JSON.parse(JSON.stringify(bids)) as any[]
