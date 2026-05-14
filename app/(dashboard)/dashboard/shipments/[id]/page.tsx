@@ -56,6 +56,9 @@ export default async function ShipmentPage({ params }: ShipmentPageProps) {
 
   const shipperObj = shipmentData.shipper ?? shipmentData.shipperId
   const shipperId = extractId(shipperObj)
+  
+  // Check if shipper is an actual object (populated from DB) or just an ID string
+  const isShipperPopulated = shipperObj && typeof shipperObj === 'object' && !Array.isArray(shipperObj)
 
   const normalizedShipment = {
     ...shipmentData,
@@ -74,29 +77,34 @@ export default async function ShipmentPage({ params }: ShipmentPageProps) {
     },
     shipper: shipmentData.shipper ?? {
       _id: shipperId,
-      name: [shipperObj?.firstName, shipperObj?.lastName].filter(Boolean).join(' ') || shipperObj?.companyName || 'Shipper',
-      email: shipperObj?.email || '',
-      image: shipperObj?.profileImage,
-      rating: shipperObj?.rating,
-      completedShipments: shipperObj?.stats?.completedShipments,
-      isVerified: shipperObj?.verificationStatus === 'approved',
+      name: isShipperPopulated 
+        ? ([shipperObj?.firstName, shipperObj?.lastName].filter(Boolean).join(' ') || shipperObj?.companyName || 'Shipper')
+        : 'Shipper',
+      email: isShipperPopulated ? (shipperObj?.email || '') : '',
+      image: isShipperPopulated ? shipperObj?.profileImage : undefined,
+      rating: isShipperPopulated ? shipperObj?.rating : undefined,
+      completedShipments: isShipperPopulated ? shipperObj?.stats?.completedShipments : undefined,
+      isVerified: isShipperPopulated ? (shipperObj?.verificationStatus === 'approved') : false,
     },
   }
 
   const normalizedBids = bidsData.map((bid: any) => {
     const carrierObj = bid.carrier ?? bid.carrierId
     const carrierId = extractId(carrierObj)
+    const isCarrierPopulated = carrierObj && typeof carrierObj === 'object' && !Array.isArray(carrierObj)
 
     return {
       ...bid,
       carrier: bid.carrier ?? {
         _id: carrierId,
-        name: [carrierObj?.firstName, carrierObj?.lastName].filter(Boolean).join(' ') || carrierObj?.companyName || 'Carrier',
-        email: carrierObj?.email || '',
-        image: carrierObj?.profileImage,
-        rating: carrierObj?.rating,
-        completedShipments: carrierObj?.stats?.completedShipments,
-        isVerified: carrierObj?.verificationStatus === 'approved',
+        name: isCarrierPopulated 
+          ? ([carrierObj?.firstName, carrierObj?.lastName].filter(Boolean).join(' ') || carrierObj?.companyName || 'Carrier')
+          : 'Carrier',
+        email: isCarrierPopulated ? (carrierObj?.email || '') : '',
+        image: isCarrierPopulated ? carrierObj?.profileImage : undefined,
+        rating: isCarrierPopulated ? carrierObj?.rating : undefined,
+        completedShipments: isCarrierPopulated ? carrierObj?.stats?.completedShipments : undefined,
+        isVerified: isCarrierPopulated ? (carrierObj?.verificationStatus === 'approved') : false,
       },
       estimatedPickup: bid.estimatedPickup ?? bid.estimatedPickupDate,
       estimatedDelivery: bid.estimatedDelivery ?? bid.estimatedDeliveryDate,
