@@ -322,7 +322,7 @@ export async function searchShipments(params: {
     await connectToDatabase()
 
     const query: Record<string, unknown> = {
-      status: "active",
+      status: { $in: ["open", "pending"] },
     }
 
     // Location filters
