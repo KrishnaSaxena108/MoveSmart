@@ -87,7 +87,8 @@ interface ShipmentDetailProps {
       suggestedPrice?: number
       minimumBid?: number
       instantPrice?: number
-      budget?: { min: number; max: number }
+      budget?: number
+      acceptedPrice?: number
     }
     liveAuction?: {
       startTime: Date
@@ -155,6 +156,7 @@ export function ShipmentDetail({
   isCarrier,
   isAdmin,
   existingBid,
+  currentUserId,
 }: ShipmentDetailProps) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('details')
@@ -509,9 +511,9 @@ export function ShipmentDetail({
                 <>
                   {shipment.pricing.budget && (
                     <div>
-                      <p className="text-sm text-muted-foreground">Budget Range</p>
+                      <p className="text-sm text-muted-foreground">Budget</p>
                       <p className="text-xl font-semibold">
-                        ${shipment.pricing.budget.min} - ${shipment.pricing.budget.max}
+                        ${shipment.pricing.budget.toFixed(2)}
                       </p>
                     </div>
                   )}
@@ -519,6 +521,12 @@ export function ShipmentDetail({
                     <div>
                       <p className="text-sm text-muted-foreground">Current Lowest Bid</p>
                       <p className="text-2xl font-bold text-success">${lowestBid.toFixed(2)}</p>
+                    </div>
+                  )}
+                  {shipment.pricing.acceptedPrice && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Filled Price</p>
+                      <p className="text-2xl font-bold text-primary">${shipment.pricing.acceptedPrice.toFixed(2)}</p>
                     </div>
                   )}
                 </>
